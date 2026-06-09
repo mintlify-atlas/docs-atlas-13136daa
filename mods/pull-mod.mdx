@@ -1,0 +1,119 @@
+---
+title: "Astras Pull Mod: Velocity Pull for Gorilla Tag"
+sidebarTitle: "Pull Mod"
+description: "Boost movement in Gorilla Tag by applying a velocity-based positional offset on hand release. Configure pull power, hill pull, and speed boost."
+---
+
+Astras Pull Mod gives you a velocity-driven lunge every time you release a hand from a surface. When a hand transitions from touching to not touching, the mod reads the rigidbody's current linear velocity and adds a scaled positional offset — letting you extend swings, clear uphill gaps, or chain launches across the map without breaking the core physics feel.
+
+<Tabs>
+  <Tab title="Main">
+    ## Parameters
+
+    <Accordion title="pullPower — Horizontal Pull Strength">
+      **Type:** `float` | **Range:** `0.001 – 0.200`
+
+      Scales the X and Z components of the velocity applied on hand release. Higher values produce a longer, faster horizontal lunge. The default Speed Boost preset uses `0.025`; the Legit preset uses `0.070`.
+    </Accordion>
+
+    <Accordion title="UpHillPull — Vertical Pull Strength">
+      **Type:** `float` | **Range:** `0.001 – 0.100`
+
+      Scales the Y component of the velocity applied on hand release. Increase this to carry more upward momentum when launching off sloped or elevated surfaces. Keep it below `pullPower` to avoid unnatural floatiness.
+    </Accordion>
+
+    <Accordion title="HandPullMode — Active Hand">
+      **Type:** `enum` | **Options:** `Left`, `Right`, `Both`
+
+      Selects which hand release triggers the pull offset. `Both` is the default and responds to either hand independently.
+    </Accordion>
+
+    <Accordion title="Speed — Speed Boost Toggle">
+      **Type:** `bool`
+
+      When enabled, overrides the player's jump multiplier and maximum jump speed every frame:
+
+      ```csharp
+      GTPlayer.Instance.jumpMultiplier = 1.5f;   // Normalmuilty
+      GTPlayer.Instance.maxJumpSpeed   = 8.5f;   // SpeedValue
+      ```
+
+      This stacks on top of the pull offset and makes short hops significantly faster.
+    </Accordion>
+
+    ## Presets
+
+    | Preset | pullPower | UpHillPull | Notes |
+    |---|---|---|---|
+    | **Speed Boost** | `0.025` | `0.020` | Low pull, relies on Speed Boost for height |
+    | **Legit** | `0.070` | `0.065` | Balanced, competition-safe feel |
+    | **Random** | random | random | Randomises both sliders |
+    | **Reset** | `0.001` | `0.001` | Returns to minimum / off state |
+
+    <Tip>
+      Start with the **Legit** preset to get a feel for the mod, then fine-tune `pullPower` up or down to match your playstyle before enabling Speed Boost.
+    </Tip>
+  </Tab>
+
+  <Tab title="Input Settings">
+    ## Input Binding
+
+    The input binding determines which controller action must be **held** at the moment of hand release for the pull to fire. If the bound input is not held, the release is ignored.
+
+    | Option | Description |
+    |---|---|
+    | Right Grab | Hold right grip button |
+    | Left Grab | Hold left grip button |
+    | Right Trigger | Hold right trigger |
+    | Left Trigger | Hold left trigger |
+    | RightJoyStick (Hold) | Hold right thumbstick down |
+    | LeftJoyStick (Hold) | Hold left thumbstick down |
+    | A Button | Hold A |
+    | B Button | Hold B |
+    | X Button | Hold X |
+    | Y Button | Hold Y |
+
+    <Note>
+      The input must be **held continuously** — not just pressed — at the moment the hand leaves the surface. Releasing the input before releasing the hand will skip the pull.
+    </Note>
+  </Tab>
+</Tabs>
+
+## How the Pull Works
+
+On every frame the mod tracks whether each hand was touching a surface on the previous frame. When a hand transitions from touching to not touching (the release moment) and the bound input is currently held, it executes:
+
+```csharp
+Vector3 Vel = GorillaTagger.Instance.rigidbody.linearVelocity;
+GTPlayer.Instance.transform.position += new Vector3(
+    Vel.x * pullPower,
+    Vel.y * UpHillPull,
+    Vel.z * pullPower
+);
+```
+
+The offset is applied **once per release event**, not per frame, so the effect is a clean, single-frame positional kick rather than a continuous force.
+
+<Warning>
+  Very high `pullPower` values (above `0.15`) can cause the player to clip through thin geometry. If you experience sudden teleportation into walls, lower `pullPower` or reduce `UpHillPull`.
+</Warning>
+
+## Getting Started
+
+<Steps>
+  <Step title="Open the Pull Mod window">
+    Launch Experimental and open the **E - Astras PullMod V1** window from the mod menu.
+  </Step>
+  <Step title="Apply a preset">
+    Click **Legit Setting** to load balanced defaults, or **Speed Boost Setting** for a faster, lower-pull style.
+  </Step>
+  <Step title="Set your Hand Mode">
+    Choose `Both`, `Left`, or `Right` under **HandPullMode** to match your climbing preference.
+  </Step>
+  <Step title="Configure your input binding">
+    Switch to the **Input Settings** tab and pick the button you want to hold while pulling.
+  </Step>
+  <Step title="Enable Speed Boost (optional)">
+    Toggle **Speed** on in the Main tab if you want the jump multiplier and max-speed override active alongside the pull.
+  </Step>
+</Steps>

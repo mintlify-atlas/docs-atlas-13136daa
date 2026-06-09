@@ -1,0 +1,105 @@
+---
+title: "Room Utilities: Join and Leave Rooms in Gorilla Tag"
+sidebarTitle: "Room Utils"
+description: "Use the Room Utils tab to join rooms by code, join a random session, or leave — with live player count and room name display."
+---
+
+The **Utils** tab in Experimental's in-game menu gives you full control over Gorilla Tag's Photon room lifecycle. You can type a room code and join directly, hop into a random Forest session, or disconnect from your current room — all while watching live player count and room name update in real time.
+
+## In-Game UI
+
+When you open the Utils tab, the panel shows your current connection state at the top, a text field for entering a room code, and three action buttons beneath it.
+
+**While in a room**, the header displays:
+- `In Room: <ROOMNAME>` — the current Photon room name
+- `Players: X/10` — the live player count out of the 10-player cap
+
+**While disconnected**, both lines fall back to `Not in a room` and `Players: 0/10`.
+
+Below the status block:
+
+| Control | Action |
+|---|---|
+| **Enter Code** text field | Type a room code (max 10 characters) |
+| **Join Room** button | Leaves any current room, then joins the typed code |
+| **Join Random** button | Leaves any current room, then joins a random Forest room |
+| **Leave** button | Disconnects from the current room |
+
+<Note>
+The room-code text field enforces a hard 10-character limit — `GUILayout.TextField(roomcode, 10)` — matching Gorilla Tag's own room-code length cap.
+</Note>
+
+## Static API — `RoomMods`
+
+All room actions are handled by the `RoomMods` static class in `Experimental.Mods.OtherUtils`. You can call these methods directly from other parts of the mod without going through the UI.
+
+<Accordion title="RoomMods.JoinRoom(string roomName)">
+
+Joins a specific room by name. If the player is already in a room, `Leave()` is called first to ensure a clean disconnect before the new join is attempted.
+
+```csharp
+RoomMods.JoinRoom("ABCDE");
+```
+
+Internally calls `PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(roomName, JoinType.Solo)`.
+
+**Parameter**
+
+| Name | Type | Description |
+|---|---|---|
+| `roomName` | `string` | The exact Photon room name to join. Case-sensitive; max 10 characters when entered via UI. |
+
+</Accordion>
+
+<Accordion title="RoomMods.JoinRandom()">
+
+Joins a random open room by triggering a Forest zone's `GorillaTriggerBox`. If the player is already in a room, `Leave()` is called first.
+
+```csharp
+RoomMods.JoinRandom();
+```
+
+The method picks one entry at random from the internal `Zoner` array of Forest join-zone `GameObject` paths, finds that object in the scene, and calls `OnBoxTriggered()` on its `GorillaTriggerBox` component — the same trigger the game uses when a player physically walks through a join portal.
+
+<Note>
+JoinRandom targets the **Forest** map exclusively. The resulting room is selected by Photon matchmaking, so the exact room code is not known in advance.
+</Note>
+
+</Accordion>
+
+<Accordion title="RoomMods.Leave()">
+
+Disconnects from the current Photon room and network session.
+
+```csharp
+RoomMods.Leave();
+```
+
+Calls `PhotonNetwork.Disconnect()` directly. Both `JoinRoom` and `JoinRandom` invoke this automatically when you are already in a room, so you do not need to call it manually before joining.
+
+</Accordion>
+
+## Usage Examples
+
+<CodeGroup>
+
+```csharp Join by Code
+// Join a specific room — Leave() is handled automatically if already in one
+RoomMods.JoinRoom("TREEHOUSE");
+```
+
+```csharp Join Random
+// Drop into a random Forest session
+RoomMods.JoinRandom();
+```
+
+```csharp Leave
+// Disconnect from the current room
+RoomMods.Leave();
+```
+
+</CodeGroup>
+
+<Warning>
+Calling `JoinRoom` or `JoinRandom` while already in a room will force-disconnect you first. Make sure any cleanup logic your other mods rely on has run before invoking these methods programmatically.
+</Warning>

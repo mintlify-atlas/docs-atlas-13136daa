@@ -1,0 +1,70 @@
+---
+title: "Experimental: Gorilla Tag Mod Collection"
+sidebarTitle: "Introduction"
+description: "Experimental is a BepInEx plugin for Gorilla Tag that bundles eight movement and utility mods into one draggable in-game menu."
+---
+
+Experimental is a BepInEx plugin for Gorilla Tag, authored by Astra, that consolidates eight distinct movement and utility mods into a single, lightweight package. Instead of juggling multiple DLL files and separate menus, you get one plugin (`Astras.Mods.Experimental`) with a unified in-game window that lets you toggle and configure every included mod without ever leaving your session.
+
+## Bundled Mods
+
+<CardGroup cols={2}>
+  <Card title="Astras PM V1 — Pull Mod" icon="hand">
+    Applies a velocity pull on hand release, letting you slingshot across surfaces for faster movement.
+  </Card>
+  <Card title="Astras PSA Mod" icon="gamepad">
+    Joystick surface acceleration — boosts movement speed based on joystick input while on surfaces.
+  </Card>
+  <Card title="APreds UI — Hand Prediction" icon="eye">
+    Renders predictive hand position overlays to help time grabs and releases more precisely.
+  </Card>
+  <Card title="Gorilla TimeV2" icon="sun">
+    Full time-of-day and weather control, letting you set the in-game sky to any hour or weather state.
+  </Card>
+  <Card title="Astras VelMax Mod" icon="bolt">
+    Surface velocity multiplier that scales how fast you can travel across different surface types.
+  </Card>
+  <Card title="AWallWalk V2" icon="grid-2">
+    Enables smooth wall-walking, so you can traverse vertical and inverted surfaces with standard movement.
+  </Card>
+  <Card title="Astras TurnMod" icon="rotate-right">
+    Adds configurable smooth or snap turning options on top of the default Gorilla Tag turning behaviour.
+  </Card>
+  <Card title="Astras PitGeo GUI" icon="mountain">
+    Exposes pit geometry surface tweaks, letting you adjust how the pit terrain interacts with physics.
+  </Card>
+</CardGroup>
+
+## Key Facts
+
+| Property | Value |
+|---|---|
+| Plugin GUID | `Astras.Mods.Experimental` |
+| Plugin Name | `Experimental` |
+| Version | `0.0.4` |
+| Author | Astra |
+| Framework | BepInEx (Unity Mono) |
+
+## How the Main Menu Works
+
+Once the plugin is loaded, press **E** on your keyboard at any time in-game to open or close the Experimental main window. The window is draggable, so you can reposition it anywhere on screen without blocking gameplay.
+
+Inside the main window there are two tabs:
+
+- **GUIs** — contains an on/off toggle for each of the eight bundled mod windows. Enabling a toggle opens that mod's own draggable configuration panel where you can adjust sliders, presets, and input bindings.
+- **Utils** — provides room join and leave utilities powered by Photon, letting you connect to a specific room code directly without using the in-game lobby board.
+
+<Note>
+  Pressing **E** again while the main window is open will hide it. Any mod windows you have already opened will remain visible and active — closing the main menu does not disable your mods.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Set up BepInEx and drop the Experimental DLL into your game directory.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Open the menu, enable your first mod, and configure it in under a minute.
+  </Card>
+</CardGroup>

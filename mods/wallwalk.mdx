@@ -1,0 +1,97 @@
+---
+title: "AWallWalk V2: Wall Walking Mod for Gorilla Tag"
+sidebarTitle: "WallWalk"
+description: "Apply continuous forward force in Gorilla Tag while holding a two-button combo. Walk up walls, ceilings, or floors with configurable speed and input pairs."
+---
+
+AWallWalk V2 uses Unity's `AddForce` with `ForceMode.Acceleration` to push the player continuously in the direction their body collider is facing. Because the force is applied to the `bodyCollider`'s rigidbody rather than directly teleporting the player, it respects the game's existing physics and surface collisions — meaning you can walk up walls, across ceilings, or along the floor without any special surface detection code.
+
+<Tabs>
+  <Tab title="Main">
+    ## Parameters
+
+    <Accordion title="WallwalkSpeed — Forward Force Strength">
+      **Type:** `float` | **Range:** `1 – 100`
+
+      The magnitude of the acceleration applied each fixed update while the input combo is held:
+
+      ```csharp
+      GTPlayer.Instance.bodyCollider.attachedRigidbody.AddForce(
+          GTPlayer.Instance.bodyCollider.transform.forward * WallwalkSpeed,
+          ForceMode.Acceleration
+      );
+      ```
+
+      Because `ForceMode.Acceleration` ignores rigidbody mass, this value maps directly to acceleration in units/s². Lower values (`10–20`) feel like a steady climb; higher values (`50+`) produce rapid launches.
+    </Accordion>
+
+    ## Presets
+
+    | Preset | WallwalkSpeed | Best For |
+    |---|---|---|
+    | **Good Setting** | `15` | General-purpose wall and floor climbing |
+    | **Fast Setting** | `55` | Speed runs and vertical launches |
+    | **Random** | random | Randomises within range |
+    | **Reset** | `0` | Stops all force application |
+
+    <Tip>
+      When walking on **floors**, lower speeds (`10–20`) keep movement natural and controllable. When scaling **vertical walls or ceilings**, you'll typically need `25–50` to overcome gravity. Start with the **Good Setting** and increase from there.
+    </Tip>
+  </Tab>
+
+  <Tab title="Input Settings">
+    ## Input Combos
+
+    WallWalk requires **two buttons held simultaneously** to activate. This prevents accidental triggering during normal movement. All four combos are two-button holds:
+
+    | Option | Left Button | Right Button |
+    |---|---|---|
+    | `LT & RT (Hold)` | Left Trigger | Right Trigger |
+    | `LG & RG (Hold)` | Left Grab | Right Grab |
+    | `LJ & RJ (Hold)` | Left Joystick Click | Right Joystick Click |
+    | `LB & RB (Hold)` | X or Y | B or A |
+
+    <Note>
+      The `LB & RB (Hold)` option treats either face button on each side as valid — holding **X or Y** on the left and **A or B** on the right will activate the mod. You don't need to hold a specific face button, just any one from each side.
+    </Note>
+
+    Release **either** button of the pair to immediately stop the forward force.
+  </Tab>
+</Tabs>
+
+## How It Works
+
+Every fixed update, if **WallWalk** is enabled and the chosen input combo is held (`InputSelectors.UseWalkPressed`), the mod calls:
+
+```csharp
+GTPlayer.Instance.bodyCollider.attachedRigidbody.AddForce(
+    GTPlayer.Instance.bodyCollider.transform.forward * WallwalkSpeed,
+    ForceMode.Acceleration
+);
+```
+
+The direction is always the **body collider's forward vector** — not the camera or head direction. This means your push direction changes as your body rotates, which happens naturally when you lean into a wall or ceiling during climbing.
+
+<Warning>
+  At speeds above `60`, the continuous acceleration can overcome the game's normal velocity clamping and launch you out of the playable area. Use the **Fast Setting** (`55`) as a soft ceiling and only go higher for specific trick routes you've already tested.
+</Warning>
+
+## Getting Started
+
+<Steps>
+  <Step title="Enable WallWalk">
+    Toggle **WallWalk** on in the mod window.
+  </Step>
+  <Step title="Apply a preset">
+    Click **Good Setting** for a balanced starting point, or **Fast Setting** for rapid traversal.
+  </Step>
+  <Step title="Choose your input combo">
+    Open the **Input Settings** tab and pick a two-button pair that won't interfere with your normal climbing. **LT & RT (Hold)** is a common choice as triggers are easy to hold simultaneously.
+  </Step>
+  <Step title="Approach a surface">
+    Move your body close to the wall or floor you want to walk on, then hold your chosen combo. The forward force will push you into and along the surface.
+  </Step>
+  <Step title="Fine-tune speed">
+    Adjust `WallwalkSpeed` while on the surface. Raise it if you're sliding off; lower it if you're launching uncontrollably.
+  </Step>
+</Steps>

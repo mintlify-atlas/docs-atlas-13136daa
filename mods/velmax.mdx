@@ -1,0 +1,100 @@
+---
+title: "VelMax Mod: Surface Velocity Multiplier for Gorilla Tag"
+sidebarTitle: "VelMax"
+description: "Multiply surface contact velocity in Gorilla Tag while holding your bound input. Tune VelMulti and VelMax to dial in explosive or controlled speed bursts."
+---
+
+VelMax overrides the `extraVelMultiplier` and `extraVelMaxMultiplier` properties on both hand surface contacts while your chosen input is held. This means every time your hands touch a surface — a wall, the floor, a tree — the velocity generated from that contact is scaled up by your configured multipliers, letting you accelerate explosively with each touch and release.
+
+<Tabs>
+  <Tab title="Main">
+    ## Parameters
+
+    <Accordion title="VelMulti — Velocity Multiplier">
+      **Type:** `float` | **Range:** `0.001 – 12`
+
+      Applied to `extraVelMultiplier` on both hand surface overrides while the input is held. This scales the raw velocity generated from each surface contact. A value of `1` is neutral (no change); values above `1` amplify each push.
+    </Accordion>
+
+    <Accordion title="VelMax — Velocity Max Multiplier">
+      **Type:** `float` | **Range:** `0.001 – 10`
+
+      Applied to `extraVelMaxMultiplier` on both hand surface overrides. This caps how high the multiplied velocity can go. Pairing a high `VelMulti` with a lower `VelMax` gives consistent medium-power boosts; matching both high produces the most aggressive launches.
+    </Accordion>
+
+    ## How the Trigger Works
+
+    VelMax is **conditional on your held input**. Every frame the mod evaluates:
+
+    ```csharp
+    float mult = (Velmax && InputSelectors.VPressed) ? VelMulti : 1f;
+    float max  = (Velmax && InputSelectors.VPressed) ? VelMax   : 1f;
+
+    // Applied to both hands:
+    surface.extraVelMultiplier    = mult;
+    surface.extraVelMaxMultiplier = max;
+    ```
+
+    When the input is **not** held, both multipliers fall back to `1f` — completely neutral. This lets you move naturally until you deliberately activate the boost.
+
+    <Note>
+      Both the **Velmax** toggle and the **input binding** must be active for the multipliers to apply. Disabling the toggle resets multipliers to `1f` regardless of input state.
+    </Note>
+
+    ## Presets
+
+    | Preset | VelMulti | VelMax | Notes |
+    |---|---|---|---|
+    | **Max** | `12` | `10` | Absolute ceiling — very explosive launches |
+    | **Random** | random | random | Random values within each slider range |
+    | **Reset** | `0.001` | `0.001` | Near-zero multipliers, effectively off |
+
+    <Tip>
+      The **Reset** preset sets values to `0.001`, not `0` — this is intentional to avoid division-by-zero edge cases in the surface override system. At `0.001` the effect is imperceptible.
+    </Tip>
+  </Tab>
+
+  <Tab title="Input Settings">
+    ## Input Binding
+
+    The input you bind here must be **held** for VelMax multipliers to take effect. Releasing the input mid-swing immediately returns multipliers to `1f`.
+
+    | Option | Description |
+    |---|---|
+    | Right Grab | Hold right grip button |
+    | Left Grab | Hold left grip button |
+    | Right Trigger | Hold right trigger |
+    | Left Trigger | Hold left trigger |
+    | RightJoyStick (Hold) | Hold right thumbstick down |
+    | LeftJoyStick (Hold) | Hold left thumbstick down |
+    | A Button | Hold A |
+    | B Button | Hold B |
+    | X Button | Hold X |
+    | Y Button | Hold Y |
+
+    <Note>
+      Choose an input that doesn't conflict with your normal climbing controls. **RightJoyStick (Hold)** or **LeftJoyStick (Hold)** are popular choices since thumbstick clicks are rarely used in standard Gorilla Tag movement.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Getting Started
+
+<Steps>
+  <Step title="Enable VelMax">
+    Toggle **Velmax** on in the mod window.
+  </Step>
+  <Step title="Set your multipliers">
+    Start with `VelMulti = 3` and `VelMax = 2` for moderate boosts. Apply the **Max** preset only once you're comfortable with the mechanic.
+  </Step>
+  <Step title="Bind your input">
+    Open the **Input Settings** tab and choose a button you can comfortably hold while climbing.
+  </Step>
+  <Step title="Test on a surface">
+    Hold your bound input and push off a wall or floor. Increase `VelMulti` until the boost strength feels right, then adjust `VelMax` to cap the top speed.
+  </Step>
+</Steps>
+
+<Warning>
+  At maximum values (`VelMulti = 12`, `VelMax = 10`) surface contacts produce extremely fast launches. Use in open areas first — high multipliers can send you out of map bounds in enclosed spaces.
+</Warning>

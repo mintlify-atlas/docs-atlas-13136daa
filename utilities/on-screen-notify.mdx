@@ -1,0 +1,86 @@
+---
+title: "On-Screen Notifications in Experimental Mod"
+sidebarTitle: "Notifications"
+description: "Display timed, stacking on-screen messages at the bottom of the player's view using OnScreenNotify.SendIT from anywhere in the mod."
+---
+
+`OnScreenNotify` is a singleton `MonoBehaviour` that renders timed text notifications at the bottom-center of the player's screen using Unity's IMGUI system. Messages appear automatically when room events fire — such as joining or leaving a Photon room — and can be triggered from any part of the mod with a single static call.
+
+## Display Behavior
+
+Notifications are drawn with `GUI.Label` during Unity's `OnGUI` pass. Key rendering characteristics:
+
+- **Position**: horizontally centered, anchored to the bottom of the screen
+- **Stacking**: multiple active notifications appear as separate lines stacked above one another
+- **Auto-removal**: each notification disappears after its individual duration expires; there is no manual dismiss
+- **Font**: 35 px, white, with Unity rich text enabled (supports `<b>`, `<color>`, etc.)
+
+<Note>
+Because `OnScreenNotify` uses IMGUI, notifications render in screen space and are always visible regardless of where the player is looking — including during cutscenes or loading transitions.
+</Note>
+
+## API
+
+### `OnScreenNotify.SendIT`
+
+```csharp
+public static void SendIT(string msg, float det = 2f)
+```
+
+The only public entry point. Call this static method from anywhere in the mod; it routes the message to the singleton instance internally.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `msg` | `string` | — | The text to display. Rich text tags are supported. |
+| `det` | `float` | `2f` | How long the notification stays visible, in seconds. |
+
+<Warning>
+`SendIT` silently does nothing if the singleton `Instance` is `null`. The instance is created when the `OnScreenNotify` component is added to the persistent `Experimental.UIS` GameObject during plugin startup. Do not call `SendIT` before `Awake` has run.
+</Warning>
+
+## Built-In Usage
+
+Experimental automatically sends notifications for Photon room events via `JoinAndLeave.cs`:
+
+<CodeGroup>
+
+```csharp Room Join
+// Fired when the local player successfully joins a room
+OnScreenNotify.SendIT($"{PlayerName} Joined Room: {IndexName} | Players {PlayerCount}/10");
+```
+
+```csharp Room Leave
+// Fired when the local player leaves or is disconnected from a room
+OnScreenNotify.SendIT("You left The Room");
+```
+
+</CodeGroup>
+
+These calls use the default 2-second duration. The join message includes the player's display name, the room code, and the current player count.
+
+## Calling From Your Own Code
+
+If you are extending Experimental with a new mod or patch, you can send a notification at any point after the plugin has initialized:
+
+<CodeGroup>
+
+```csharp Default Duration (2 s)
+// Show a message for the default 2 seconds
+OnScreenNotify.SendIT("Speed boost activated!");
+```
+
+```csharp Custom Duration
+// Show a message for 5 seconds
+OnScreenNotify.SendIT("Wall-walk enabled", 5f);
+```
+
+```csharp Rich Text
+// Bold text with a color tag
+OnScreenNotify.SendIT("<color=yellow><b>Warning:</b></color> High velocity detected", 3f);
+```
+
+</CodeGroup>
+
+<Tip>
+Keep notification text short enough to fit on one line at 35 px. Long strings will wrap and push other stacked notifications upward, which can look cluttered if multiple notifications are active simultaneously.
+</Tip>

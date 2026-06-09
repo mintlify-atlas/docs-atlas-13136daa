@@ -1,0 +1,84 @@
+---
+title: "Install Experimental on Gorilla Tag"
+sidebarTitle: "Installation"
+description: "Step-by-step guide to installing the Experimental BepInEx plugin on Gorilla Tag — from downloading BepInEx to placing the DLL."
+---
+
+Installing Experimental takes only a few minutes. You will download BepInEx, extract it into your Gorilla Tag directory, and then drop a single DLL file into the plugins folder. Everything below assumes you already own Gorilla Tag on PC (Steam or standalone).
+
+## Prerequisites
+
+- **Gorilla Tag (PC)** — the mod does not work on Quest standalone without a PC link.
+- **BepInEx Unity Mono** — the mod loader that lets custom plugins run inside Unity games.
+- A file manager (Windows Explorer is fine) and the ability to navigate to your Gorilla Tag install folder.
+
+<Warning>
+  Use mods responsibly in multiplayer. Certain movement mods can disrupt other players' experience. Always respect the community guidelines and be mindful of the servers you join.
+</Warning>
+
+## Install Steps
+
+<Steps>
+  <Step title="Download BepInEx">
+    Go to the [BepInEx releases page](https://github.com/BepInEx/BepInEx/releases) and download the latest **BepInEx Unity Mono x64** build. The file will be named something like `BepInEx_UnityMono_x64_X.X.X.X.zip`.
+  </Step>
+
+  <Step title="Extract BepInEx into your Gorilla Tag directory">
+    Locate your Gorilla Tag installation folder (right-click the game in Steam → **Manage → Browse local files**). Extract the contents of the BepInEx zip directly into that folder so the `BepInEx/` directory sits alongside `Gorilla Tag.exe`:
+
+    ```
+    Gorilla Tag/
+    ├── Gorilla Tag.exe
+    ├── BepInEx/
+    │   ├── core/
+    │   └── ...
+    └── ...
+    ```
+  </Step>
+
+  <Step title="Run the game once to let BepInEx initialise">
+    Launch Gorilla Tag normally and wait until you reach the main lobby, then close the game. This first run lets BepInEx generate its configuration files and, importantly, creates the `BepInEx/plugins/` folder that you will use in the next step.
+  </Step>
+
+  <Step title="Download Experimental.dll">
+    Head to the [Experimental releases page](https://github.com/ASTRA228b/Experimental) and download the latest `Experimental.dll` file.
+  </Step>
+
+  <Step title="Copy Experimental.dll into BepInEx/plugins/">
+    Place the downloaded DLL inside the `BepInEx/plugins/` folder you just saw created. Your directory should now look like this:
+
+    ```
+    Gorilla Tag/
+    ├── Gorilla Tag.exe
+    ├── BepInEx/
+    │   ├── plugins/
+    │   │   └── Experimental.dll   ← place the DLL here
+    │   ├── core/
+    │   └── config/
+    └── ...
+    ```
+  </Step>
+
+  <Step title="Launch the game">
+    Start Gorilla Tag. BepInEx automatically scans the `plugins/` folder on startup and loads every DLL it finds — no extra configuration required. Experimental will be active as soon as the game finishes loading.
+  </Step>
+</Steps>
+
+## Verifying the Installation
+
+BepInEx writes a log to `BepInEx/LogOutput.log` in your game directory. Open that file after launching and search for `Experimental`. A successful load looks like this:
+
+```
+[Info   :   BepInEx] Loading [Experimental 0.0.4]
+[Info   :Experimental] ...
+```
+
+If you see an error instead, double-check that you downloaded the **Unity Mono** build of BepInEx (not the IL2CPP build) and that the DLL is directly inside `plugins/` and not in a subfolder.
+
+<Note>
+  Once loaded, press **E** on your keyboard at any time in-game to open the Experimental main menu. No VR controller binding is needed — the menu is keyboard-driven.
+</Note>
+
+## Next Steps
+
+Head to the [Quickstart guide](/quickstart) to open your first mod window and configure it for the first time.

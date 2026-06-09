@@ -1,0 +1,198 @@
+---
+title: "Input System: VR Controller Bindings in Experimental"
+sidebarTitle: "Input System"
+description: "How Experimental maps raw VR controller hardware through InputLib and per-mod InputSelectors to give every mod a configurable button binding."
+---
+
+Experimental's input system is split into two layers. `InputLib` reads raw hardware state from Gorilla Tag's existing controller pollers and SteamVR actions, exposing clean boolean and `Vector2` properties. `InputSelectors` sits on top of that, letting each mod pick which physical button it wants to use at runtime via an index the player selects in the UI.
+
+## Layer 1 — `InputLib` (Raw Hardware)
+
+`InputLib` is a static class whose properties wrap the lowest-level controller queries available in Gorilla Tag. Every property evaluates live — there is no caching — so reading the same property twice in one frame always reflects the same physical state.
+
+### Grip
+
+| Property | Type | Source |
+|---|---|---|
+| `RightGrab` | `bool` | `rightControllerGripFloat > 0.5f` |
+| `LeftGrab` | `bool` | `leftControllerGripFloat > 0.5f` |
+
+Grip is analog at the hardware level; the 0.5 threshold converts it to a digital press.
+
+### Trigger
+
+| Property | Type | Source |
+|---|---|---|
+| `RightTrigger` | `bool` | `rightControllerTriggerButton` |
+| `LeftTrigger` | `bool` | `leftControllerTriggerButton` |
+
+These use the game's built-in digital trigger buttons rather than the analog float.
+
+### Face Buttons
+
+| Property | Type | Maps To |
+|---|---|---|
+| `RightControllerAButton` | `bool` | `rightControllerPrimaryButton` |
+| `RightControllerBButton` | `bool` | `rightControllerSecondaryButton` |
+| `LeftControllerYButton` | `bool` | `leftControllerSecondaryButton` |
+| `LeftControllerXButton` | `bool` | `leftControllerPrimaryButton` |
+
+<Note>
+On **HTC Vive wands**, there is only a single face button per controller. That button registers as both the primary **and** secondary input simultaneously, meaning both `A`+`B` (right) or both `X`+`Y` (left) report `true` when the Vive button is pressed.
+</Note>
+
+### Joystick Clicks
+
+| Property | Type | SteamVR Action |
+|---|---|---|
+| `RightJoystickClick` | `bool` | `gorillaTag_RightJoystickClick.state` |
+| `LeftJoystickClick` | `bool` | `gorillaTag_LeftJoystickClick.state` |
+
+### Joystick Axes
+
+| Property | Type | SteamVR Action |
+|---|---|---|
+| `RightJoyStickAxis` | `Vector2` | `gorillaTag_RightJoystick2DAxis.axis` |
+| `LeftJoyStickAxis` | `Vector2` | `gorillaTag_LeftJoystick2DAxis.axis` |
+
+`Vector2.x` is the horizontal axis and `Vector2.y` is the vertical axis, with values in the range −1 to 1.
+
+## Layer 2 — `InputSelectors` (Per-Mod Mapping)
+
+`InputSelectors` is a static class that exposes one **index** property and one **pressed** property (or axis property) per mod. The index is set by the player in the mod's UI dropdown; the pressed/axis property evaluates the corresponding `InputLib` entry at runtime.
+
+Each mod maintains its own isolated binding so two mods can safely use different buttons at the same time.
+
+### Boolean Input Selectors
+
+The following mods use a `bool` pressed signal. Unless noted otherwise, they share the same 10-option list:
+
+> **10-option list (index 0–9):** Right Grab, Left Grab, Right Trigger, Left Trigger, A Button, B Button, X Button, Y Button, Right Joystick Click, Left Joystick Click
+
+<Accordion title="PullMod">
+
+| Property | Type | Purpose |
+|---|---|---|
+| `PSelectedIndex` | `int` | Active binding index (0–9) |
+| `PPressed` | `bool` | `true` when the selected button is held |
+
+Set `PSelectedIndex` from the UI dropdown; read `PPressed` each `FixedUpdate` to trigger pull behavior.
+
+</Accordion>
+
+<Accordion title="VelMax">
+
+| Property | Type | Purpose |
+|---|---|---|
+| `VSelectedIndex` | `int` | Active binding index (0–9) |
+| `VPressed` | `bool` | `true` when the selected button is held |
+
+Same 10-option list as PullMod. Controls when the velocity cap is actively enforced.
+
+</Accordion>
+
+<Accordion title="WallWalk">
+
+Uses a 4-option combo list — two buttons must be held simultaneously:
+
+| Index | Combo |
+|---|---|
+| 0 | Left Trigger **&** Right Trigger |
+| 1 | Left Grab **&** Right Grab |
+| 2 | Left Joystick Click **&** Right Joystick Click |
+| 3 | Left B Button **&** Right B Button |
+
+| Property | Type | Purpose |
+|---|---|---|
+| `UseWalkIndex` | `int` | Active combo index (0–3) |
+| `UseWalkPressed` | `bool` | `true` when both buttons in the combo are held |
+
+</Accordion>
+
+<Accordion title="TurnMod (Left Hand)">
+
+4-option list for the left-hand activation button:
+
+| Index | Button |
+|---|---|
+| 0 | X Button |
+| 1 | Y Button |
+| 2 | Left Grab |
+| 3 | Left Trigger |
+
+| Property | Type | Purpose |
+|---|---|---|
+| `ATLSelectedIndex` | `int` | Active binding index (0–3) |
+| `ATLPressed` | `bool` | `true` when the selected left-hand button is held |
+
+</Accordion>
+
+<Accordion title="TurnMod (Right Hand)">
+
+4-option list for the right-hand activation button:
+
+| Index | Button |
+|---|---|
+| 0 | A Button |
+| 1 | B Button |
+| 2 | Right Grab |
+| 3 | Right Trigger |
+
+| Property | Type | Purpose |
+|---|---|---|
+| `ATRSelectedIndex` | `int` | Active binding index (0–3) |
+| `ATRPressed` | `bool` | `true` when the selected right-hand button is held |
+
+</Accordion>
+
+<Accordion title="PitGeo">
+
+Same 10-option list as PullMod.
+
+| Property | Type | Purpose |
+|---|---|---|
+| `PitGSelectedIndex` | `int` | Active binding index (0–9) |
+| `PitPressed` | `bool` | `true` when the selected button is held |
+
+</Accordion>
+
+### Axis Input Selector
+
+<Accordion title="PSA (Position-Set Assist)">
+
+PSA needs a `Vector2` axis rather than a button press.
+
+| Index | Source |
+|---|---|
+| 0 | Right Joystick (`RightJoyStickAxis`) |
+| 1 | Left Joystick (`LeftJoyStickAxis`) |
+
+| Property | Type | Purpose |
+|---|---|---|
+| `SelectedIndex` | `int` | Active axis index (0–1) |
+| `Axis` | `Vector2` | Current joystick axis value from the selected side |
+
+</Accordion>
+
+## Reading Input in Practice
+
+```csharp
+// In a FixedUpdate method — check if PullMod's configured button is held
+if (InputSelectors.PPressed)
+{
+    // apply pull force
+}
+
+// Read the PSA joystick axis directly
+Vector2 moveInput = InputSelectors.Axis;
+
+// Read a raw InputLib value without going through InputSelectors
+if (InputLib.RightGrab && InputLib.LeftGrab)
+{
+    // both grips held
+}
+```
+
+<Tip>
+Prefer `InputSelectors` over direct `InputLib` calls inside mod logic. Using the selector means the player can rebind the action from the UI without requiring a code change.
+</Tip>

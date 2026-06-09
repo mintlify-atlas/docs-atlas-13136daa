@@ -1,47 +1,93 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Get Started with Experimental Mods"
+sidebarTitle: "Quickstart"
+description: "Open the Experimental menu, enable your first mod, configure Pull Mod and VelMax, and learn how every bundled tool fits together in minutes."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+This guide picks up right where [Installation](/installation) left off. With BepInEx installed and `Experimental.dll` sitting in your `plugins/` folder, you are ready to open the menu and start experimenting. The whole flow from launch to an active mod takes under two minutes.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+## Steps
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
-
-    ```bash
-    npm install your-package
-    ```
+  <Step title="Launch Gorilla Tag and wait for the lobby">
+    Start the game as normal and let it finish loading until you are standing in the main lobby. The plugin loads silently in the background — you will not see a notification, but Experimental is already active.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
+  <Step title="Press E to open the Experimental window">
+    Press **E** on your keyboard. A draggable window labelled **Experimental** appears on screen. You can click and drag the title bar to reposition it anywhere that does not block your view.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
-    ```
+  <Step title="Click the GUIs tab">
+    The main window has two tabs at the top: **GUIs** and **Utils**. Click **GUIs** to see the full list of mod toggles:
+
+    | Toggle | Mod |
+    |---|---|
+    | Astras PM V1 | Pull Mod |
+    | Apreds UI | Hand Prediction |
+    | Gorilla TimeV2 | Time & Weather Control |
+    | Astras PSA Mod | Joystick Surface Acceleration |
+    | Astras VelMax Mod | Surface Velocity Multiplier |
+    | AWallWalk V2 | Wall Walking |
+    | Astras TurnMod | Smooth / Snap Turning |
+    | Astras PitGeo GUI | Pit Geometry Tweaks |
+
+    Every toggle is off by default. Enabling one opens that mod's own configuration window.
+  </Step>
+
+  <Step title="Toggle Astras PM V1 to open the Pull Mod window">
+    Click the **Astras PM V1** toggle. A new draggable window — the Pull Mod panel — appears on screen. This is where you configure the velocity pull that fires when you release a grabbed surface.
+  </Step>
+
+  <Step title="Configure Pull Mod: slider, preset, and input">
+    Inside the Pull Mod window:
+
+    1. **Drag the Pull Speed slider** to set how hard the pull launches you on release. Higher values mean a larger velocity boost.
+    2. **Choose a preset** for a quick starting point — for example, select **"Legit Setting: (70)"** to use a community-balanced value that keeps movement feeling natural.
+    3. **Pick an input binding** — for example, choose **Right Grab** so the pull triggers when you release the right controller's grab button.
+
+    <Tip>
+      The **Reset** button inside any mod window always returns that mod's settings to their safe defaults. If something feels off, hit Reset before adjusting further.
+    </Tip>
+  </Step>
+
+  <Step title="Enable a second mod: Astras VelMax Mod">
+    Switch back to the Experimental main window, stay on the **GUIs** tab, and click the **Astras VelMax Mod** toggle. The VelMax configuration window opens alongside the Pull Mod window. Both mods are now active simultaneously — you can run as many at once as you like.
+  </Step>
+
+  <Step title="Hide the main window by pressing E again">
+    Press **E** once more. The Experimental main window closes, giving you an unobstructed view. Your mod windows (Pull Mod, VelMax, and any others you opened) stay visible and remain fully active — hiding the menu does not pause or disable anything.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## Tips
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+<Tip>
+  Every mod window is independently draggable. Arrange them around the edges of your screen so they are accessible without covering the centre of your view.
 </Tip>
+
+<Tip>
+  Presets are the fastest way to find a good starting value. Pick one close to what you want, then fine-tune with the slider. The **Reset** button is always available to undo any changes and return to safe defaults.
+</Tip>
+
+<Tip>
+  The **Utils** tab in the main window lets you join a Gorilla Tag room by typing its code directly and clicking Join — no need to walk up to the lobby board or use the phone. You can also leave your current room from the same tab.
+</Tip>
+
+## What to Explore Next
+
+Now that you have the basics down, try out the rest of the bundled mods:
+
+<CardGroup cols={2}>
+  <Card title="Gorilla TimeV2" icon="sun">
+    Open the time and weather window to change the sky to dusk, night, or a stormy overcast while you play.
+  </Card>
+  <Card title="AWallWalk V2" icon="grid-2">
+    Enable wall walking and practice traversing the vertical surfaces around the map without losing grip.
+  </Card>
+  <Card title="Astras TurnMod" icon="rotate-right">
+    Switch between smooth and snap turning presets to find the rotation style that feels most comfortable.
+  </Card>
+  <Card title="Astras PitGeo GUI" icon="mountain">
+    Adjust pit geometry surface values to change how the pit terrain responds to contact and velocity.
+  </Card>
+</CardGroup>

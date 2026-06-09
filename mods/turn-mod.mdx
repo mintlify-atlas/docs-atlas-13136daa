@@ -1,0 +1,122 @@
+---
+title: "Astras TurnMod: Smooth & Snap Turning for Gorilla Tag"
+sidebarTitle: "Turn Mod"
+description: "Add smooth or snap turning to Gorilla Tag with configurable speed, smoothness, and snap angle. Bind independent left and right inputs for full control."
+---
+
+Astras TurnMod rotates the player's turn parent around their head position using `RotateAround(headPos, Vector3.up, angle)`, giving you comfortable yaw rotation without physically moving your body. Two distinct modes are available: **Smooth Turn**, which applies a continuous angular velocity with optional lerp dampening, and **Snap Turn**, which fires a fixed-angle rotation on a single button press.
+
+<Tabs>
+  <Tab title="Main">
+    ## Turn Mode Selection
+
+    Toggle **TM** to enable the mod, then choose your mode:
+
+    | Setting | Description |
+    |---|---|
+    | **ST = false** | Smooth Turn — continuous rotation while input is held |
+    | **ST = true** | Snap Turn — single fixed rotation on each button press |
+
+    ---
+
+    ## Smooth Turn Parameters
+
+    These parameters are only active when **ST** is `false`.
+
+    <Accordion title="TurnSpeed — Rotation Speed">
+      **Type:** `float` | **Range:** `30 – 900 °/s`
+
+      The target angular velocity in degrees per second. When an input is held, the controller accumulates `±TurnSpeed` as the target value (`haii`). Higher values spin you faster; `30` is a gentle glide while `900` is near-instant.
+    </Accordion>
+
+    <Accordion title="Smoothnes — Turn Smoothness">
+      **Type:** `float` | **Range:** `0 – 5`
+
+      Controls how quickly the actual rotation velocity (`TV`) catches up to the target (`haii`) via a `Lerp`. The lerp speed itself is interpolated: at `Smoothnes = 0` the lerp rate is `50` (very snappy), and at `Smoothnes = 5` the rate is `2` (very gradual):
+
+      ```csharp
+      // If Smoothnes > 0.01:
+      TV = Lerp(TV, haii, Mathf.Lerp(50, 2, Smoothnes) * dt);
+      // Else (Smoothnes ≈ 0):
+      TV = haii;  // Instant, no easing
+      ```
+
+      Set `Smoothnes = 0` for an immediate, frame-accurate response. Raise it toward `5` for a cinematic deceleration curve when you release the input.
+    </Accordion>
+
+    ---
+
+    ## Snap Turn Parameters
+
+    These parameters are only active when **ST** is `true`.
+
+    <Accordion title="SnapAngle — Snap Rotation Angle">
+      **Type:** `float` | **Range:** `15 – 90°`
+
+      The number of degrees rotated per button press. Each press fires exactly one snap — holding the button does not repeat. Common VR-comfort values are `30°`, `45°`, and `60°`. The direction is determined by which input you press (left turns negative, right turns positive).
+    </Accordion>
+  </Tab>
+
+  <Tab title="Input Settings">
+    ## Left Turn Input
+
+    Binds the button that triggers a **left (counter-clockwise)** rotation.
+
+    | Option | Controller Button |
+    |---|---|
+    | X | X face button |
+    | Y | Y face button |
+    | Left Grab | Left grip button |
+    | Left Trigger | Left trigger |
+
+    ## Right Turn Input
+
+    Binds the button that triggers a **right (clockwise)** rotation.
+
+    | Option | Controller Button |
+    |---|---|
+    | A | A face button |
+    | B | B face button |
+    | Right Grab | Right grip button |
+    | Right Trigger | Right trigger |
+
+    <Note>
+      Left and right inputs are **independently configurable**. You can, for example, bind Left Grab for left turns and Right Trigger for right turns. There is no requirement that both sides use the same button type.
+    </Note>
+
+    <Warning>
+      Avoid binding turn inputs to the same buttons you use for climbing or VelMax. Conflicting bindings can cause unintended simultaneous activations — for example, binding Right Grab to right turn will rotate you every time you grab a surface with your right hand.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## How Rotation Is Applied
+
+Both modes rotate around the player's head rather than the world origin, keeping the camera pivot centred on the player:
+
+```csharp
+pivi.RotateAround(headPos, Vector3.up, TV * dt);   // Smooth Turn
+pivi.RotateAround(headPos, Vector3.up, ±SnapAngle); // Snap Turn (rising edge only)
+```
+
+In Snap Turn mode the controller tracks the **rising edge** of each button press — you must release and re-press to get a second snap. This matches standard VR locomotion conventions and prevents continuous rotation while the button is held.
+
+## Getting Started
+
+<Steps>
+  <Step title="Enable TurnMod">
+    Toggle **TM** on in the mod window.
+  </Step>
+  <Step title="Choose your mode">
+    Leave **ST** off for Smooth Turn, or enable it for Snap Turn. Pick the mode that matches your comfort preference.
+  </Step>
+  <Step title="Configure Smooth Turn (if applicable)">
+    Set **TurnSpeed** to `90–180` for natural movement. Keep **Smoothnes** at `0` for precision or raise it toward `2–3` for eased deceleration.
+  </Step>
+  <Step title="Configure Snap Turn (if applicable)">
+    Set **SnapAngle** to `45°` as a starting point. Reduce to `30°` for finer steps or increase to `60°` for faster orientation changes.
+  </Step>
+  <Step title="Bind your inputs">
+    Open the **Input Settings** tab, assign your left turn input and right turn input, then test in a safe area.
+  </Step>
+</Steps>

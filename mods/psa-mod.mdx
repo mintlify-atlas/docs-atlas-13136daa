@@ -1,0 +1,89 @@
+---
+title: "Astras PSA Mod: Surface Acceleration in Gorilla Tag"
+sidebarTitle: "PSA Mod"
+description: "Drive your Gorilla Tag character with joystick input and dynamic surface acceleration. Tune speed, ground detection distance, and air control per preset."
+---
+
+PSA Mod replaces passive physics movement with active joystick-driven acceleration. While enabled, your left or right thumbstick feeds a directional target computed from the **head transform's forward and right vectors**, and the mod lerps your velocity toward that target every fixed update. Ground proximity is checked with a downward raycast so the mod can scale air control and drag differently depending on whether you are on a surface or airborne.
+
+<Tabs>
+  <Tab title="Main">
+    ## Parameters
+
+    <Accordion title="Speedd — Movement Speed">
+      **Type:** `float` | **Range:** `1 – 12`
+
+      Controls the target speed magnitude the velocity lerp aims for. Higher values reach top speed faster and feel more aggressive. The internal air-control ratio scales proportionally between `0.3` (speed = 1) and `0.7` (speed = 12), so faster settings also give more aerial steering.
+    </Accordion>
+
+    <Accordion title="MexGroundDis — Max Ground Distance">
+      **Type:** `float` | **Range:** `0.1 – 2.0`
+
+      The raycast threshold (in world units) used to decide whether you are "grounded." A downward ray of length `10f` is cast every fixed update; if the hit distance is less than or equal to `MexGroundDis`, the mod treats you as grounded and applies full drag. Increase this to stay grounded on bumpy or sloped surfaces; decrease it to preserve air momentum sooner after leaving a ledge.
+    </Accordion>
+
+    ## Presets
+
+    | Preset | Speed | Ground Distance | Best For |
+    |---|---|---|---|
+    | **Legit** | `4.5` | `0.6` | Subtle competitive movement |
+    | **Comp** | `6.5` | `0.8` | Tournament-style acceleration |
+    | **Speed Boost** | `9.5` | `1.0` | Fast open-map traversal |
+    | **Ice** | `7.5` | `0.2` | Slippery, low-drag sliding |
+    | **Air Control** | `8.5` | `0.4` | High-speed aerial steering |
+    | **Random** | random | random | Random values within range |
+    | **Reset** | `1` | `0.1` | Minimum / off state |
+
+    <Tip>
+      The **Ice** preset pairs a high speed with a very small ground distance (`0.2`), which means the grounded drag kicks in only when you are nearly flush with a surface — producing a slide-like feel. If you want that sensation but with more control, raise `MexGroundDis` slightly to `0.4–0.5`.
+    </Tip>
+  </Tab>
+
+  <Tab title="Input Settings">
+    ## Joystick Selection
+
+    PSA Mod reads **axis input** from the thumbstick, not a button press. Select which stick drives movement:
+
+    | Option | Description |
+    |---|---|
+    | Right Joystick | Use the right thumbstick X/Y axes |
+    | Left Joystick | Use the left thumbstick X/Y axes |
+
+    <Note>
+      Unlike button-based mods, PSA Mod requires the stick to be **deflected** — holding it centred produces no movement input. The acceleration scales with stick deflection magnitude, so partial pushes give proportionally less speed.
+    </Note>
+  </Tab>
+</Tabs>
+
+## How Grounded Detection Works
+
+Every fixed update the mod casts a ray straight downward from the player origin with a length of `10f`. The hit distance is compared against `MexGroundDis`:
+
+- **Grounded** (`hitDist ≤ MexGroundDis`): full drag is applied (scales from `0.98` at low speed to `0.90` at high speed), and a ground-correction lerp prevents the player from sinking below the surface.
+- **Airborne** (`hitDist > MexGroundDis`): drag is reduced and the air-control ratio (how much the joystick can steer) scales between `0.3–0.7` based on `Speedd`.
+
+This means `MexGroundDis` is the primary knob for determining how "sticky" the mod feels on surfaces.
+
+## Getting Started
+
+<Steps>
+  <Step title="Enable PSA Mod">
+    Toggle **PSAEnabled** on in the mod window to activate the acceleration system.
+  </Step>
+  <Step title="Load a preset">
+    Click **Legit** or **Comp** for a conservative start. Use **Speed Boost** only in open areas — it can feel overwhelming in confined spaces.
+  </Step>
+  <Step title="Tune ground distance">
+    If the mod feels like it "sticks" too much on ramps, lower `MexGroundDis`. If you lose ground traction after small bumps, raise it.
+  </Step>
+  <Step title="Select your joystick">
+    Open the **Input Settings** tab and choose **Right Joystick** or **Left Joystick** depending on your controller grip preference.
+  </Step>
+  <Step title="Adjust speed">
+    Fine-tune `Speedd` until acceleration feels natural for your movement style, then save as a custom value or revisit presets.
+  </Step>
+</Steps>
+
+<Warning>
+  Very high speed values (`10+`) combined with a large `MexGroundDis` can make the player difficult to stop once moving. Use the **Reset** preset to return to safe defaults if the mod feels uncontrollable.
+</Warning>

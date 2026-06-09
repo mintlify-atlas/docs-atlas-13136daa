@@ -1,0 +1,151 @@
+---
+title: "GUI Helpers: Styles, Textures, and Dropdowns"
+sidebarTitle: "GUI Helpers"
+description: "Reference for GlobalTex, GlobalStyles, and MenuHelper.Dropdown — the shared IMGUI utilities that power Experimental's in-game menu styling."
+---
+
+Experimental's IMGUI menu is built on three helper classes that handle texture creation, style initialization, and stateful dropdown widgets. Rather than scattering magic colors and repeated style setup across every mod's `MakeUI()` method, these helpers centralize everything so the entire menu stays visually consistent and easy to extend.
+
+## `GlobalTex` — Solid-Color Textures
+
+```csharp
+public static Texture2D MakeTex(int WW, int HH, Color H)
+```
+
+Creates a new `Texture2D` of the given dimensions filled with a single solid color. Used internally by `GlobalStyles` to generate the background textures for every UI element.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `WW` | `int` | Texture width in pixels |
+| `HH` | `int` | Texture height in pixels |
+| `H` | `Color` | The fill color (RGBA) |
+
+**Returns** a `Texture2D` with `SetPixel` and `Apply` already called — ready to assign to a `GUIStyle.normal.background` or equivalent field.
+
+```csharp
+// Create a semi-transparent red background texture
+Texture2D redBg = GlobalTex.MakeTex(1, 1, new Color(1f, 0f, 0f, 0.8f));
+myStyle.normal.background = redBg;
+```
+
+<Note>
+For solid fills, a 1×1 texture is sufficient and cheapest. Unity stretches it to fill the control's rect. Only use larger dimensions if you need the texture for something other than a uniform color fill.
+</Note>
+
+## `GlobalStyles` — Shared GUIStyle Initialization
+
+`GlobalStyles.INIT()` sets up every `GUIStyle` used across the entire mod menu. It is called exactly once, on the first `OnGUI` frame, guarded by the `SLoaded` boolean flag in `Main`.
+
+### Why Lazy Initialization?
+
+IMGUI `GUIStyle` objects reference textures and `GUI.skin` data that are only valid inside a GUI event. Creating them in `Awake` or `Start` would fail or produce incorrect results. The `SLoaded` flag pattern ensures `INIT()` runs at the earliest safe moment.
+
+```csharp
+// Inside Main.OnGUI():
+if (!SLoaded)
+{
+    GlobalStyles.INIT();
+    SLoaded = true;
+}
+```
+
+### Color Scheme
+
+All colors are defined as RGBA floats and passed through `GlobalTex.MakeTex`:
+
+| Element | Color (RGBA floats) | Visual |
+|---|---|---|
+| Window background | `(0.1, 0.1, 0.1, 1)` | Near-black |
+| Slider track | `(0.15, 0.15, 0.15, 1)` | Dark grey |
+| Slider thumb | `(0.0, 0.6, 1.0, 1)` | Accent blue |
+| Button background | `(0.2, 0.2, 0.2, 1)` | Dark grey |
+| Button text — normal | white | — |
+| Button text — hover / active / on | blue | — |
+
+### `ApplyBackground`
+
+A helper method on `GlobalStyles` that stamps a `Texture2D` onto all interactive states (`normal`, `hover`, `active`, `onNormal`, `onHover`, `onActive`) of a given `GUIStyle` at once — saving repetitive property assignment when defining a new style.
+
+```csharp
+// Apply the same texture to every state of a custom style
+GlobalStyles.ApplyBackground(ref myStyle, GlobalTex.MakeTex(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f)));
+```
+
+<Warning>
+Do not call `GlobalStyles.INIT()` or `ApplyBackground` outside of a GUI event (i.e., not in `Awake`, `Start`, or `Update`). IMGUI texture assignments made outside `OnGUI` may be silently ignored or throw exceptions.
+</Warning>
+
+## `MenuHelper.Dropdown` — Stateful Dropdown Widget
+
+The built-in IMGUI toolkit has no native dropdown control. `MenuHelper.Dropdown` fills that gap with a stateful dropdown that tracks its own open/closed state in a static dictionary keyed by a string ID.
+
+### Signature
+
+```csharp
+public static int Dropdown(
+    string id,
+    string[] options,
+    int selectedIndex,
+    params GUILayoutOption[] layout
+)
+```
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique identifier for this dropdown's open/close state. Must be distinct per dropdown on screen. |
+| `options` | `string[]` | Array of display labels, one per option. |
+| `selectedIndex` | `int` | The currently selected option index. |
+| `layout` | `GUILayoutOption[]` | Optional layout options (e.g., `GUILayout.Width(200)`). |
+
+**Returns** the new `selectedIndex` — either the same value if no change was made, or the index of whichever option the player clicked.
+
+### How It Works
+
+Internally, `Dropdown` maintains a `static Dictionary<string, bool>` that maps each `id` to whether that dropdown is currently expanded. On each `OnGUI` call:
+
+1. Renders a main button labeled with `options[selectedIndex]`.
+2. If the dictionary marks this `id` as open, renders a button for every entry in `options` below the main button.
+3. Clicking an option button closes the dropdown and returns that option's index.
+4. Clicking the main button again toggles it closed without changing the selection.
+
+### Usage Example
+
+<CodeGroup>
+
+```csharp Basic Dropdown
+// Persist the index in a field or GlobalVars
+private int myModIndex = 0;
+
+void MakeUI()
+{
+    myModIndex = MenuHelper.Dropdown(
+        "mymod.input",           // unique ID
+        new[] { "Option A", "Option B", "Option C" },
+        myModIndex,
+        GUILayout.Width(180)
+    );
+}
+```
+
+```csharp Input Selector Dropdown
+// Wiring a dropdown directly to an InputSelectors index
+InputSelectors.PSelectedIndex = MenuHelper.Dropdown(
+    "pullmod.input",
+    new[]
+    {
+        "Right Grab", "Left Grab",
+        "Right Trigger", "Left Trigger",
+        "A Button", "B Button",
+        "X Button", "Y Button",
+        "Right Joystick Click", "Left Joystick Click"
+    },
+    InputSelectors.PSelectedIndex,
+    GUILayout.Width(200)
+);
+```
+
+</CodeGroup>
+
+<Tip>
+Choose `id` values that are unique across the entire mod menu — not just unique within a single mod's `MakeUI()` method. A collision between two dropdowns sharing the same `id` will cause them to open and close in sync, which is almost never the desired behavior.
+</Tip>

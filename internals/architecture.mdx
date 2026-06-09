@@ -1,0 +1,145 @@
+---
+title: "Experimental Mod Architecture and Plugin Structure"
+sidebarTitle: "Architecture"
+description: "How Experimental's BepInEx plugin bootstraps two persistent GameObjects, applies Harmony patches, and drives its per-frame update loops."
+---
+
+Experimental is a BepInEx 6 plugin that bootstraps itself into Gorilla Tag by creating two persistent `GameObject` hierarchies at startup, then drives all mod logic through Unity's standard `Update`, `FixedUpdate`, and `OnGUI` MonoBehaviour callbacks. Understanding this structure is essential for adding new mods or debugging existing ones.
+
+## BepInEx Entry Point — `Plugin`
+
+The plugin is identified by the BepInEx attribute:
+
+```csharp
+[BepInPlugin("Astras.Mods.Experimental", "Experimental", "0.0.4")]
+public class Plugin : BaseUnityPlugin
+```
+
+`Plugin` itself is a thin bootstrapper. All real work is delegated to the components it attaches to persistent GameObjects.
+
+### Startup Sequence
+
+```
+Plugin.Awake()
+  ├─ new GameObject("Experimental.UIS")
+  │    ├─ AddComponent<Main>()               ← IMGUI window + mod orchestration
+  │    └─ AddComponent<ControllerSystemManager>()
+  └─ DontDestroyOnLoad(go)
+
+Plugin.Start()
+  └─ PatchLoader.Apply()                     ← Harmony patches
+```
+
+`Awake` runs before `Start`, so the persistent objects and their components exist before any Harmony patches are applied.
+
+## Persistent GameObjects
+
+Experimental creates two `DontDestroyOnLoad` GameObjects that survive scene transitions:
+
+<Accordion title="Experimental.UIS">
+
+Created directly in `Plugin.Awake()`. Hosts the two primary MonoBehaviours:
+
+| Component | Role |
+|---|---|
+| `Main` | IMGUI window rendering, mod tab dispatch, `Update` / `FixedUpdate` orchestration |
+| `ControllerSystemManager` | Creates the second persistent object (see below) |
+
+</Accordion>
+
+<Accordion title="Astras.Mods.Experimental.SystemManager">
+
+Created inside `ControllerSystemManager.Awake()`. Hosts the two secondary MonoBehaviours:
+
+| Component | Role |
+|---|---|
+| `ATurnModController` | Smooth and snap turn logic, runs in `FixedUpdate` |
+| `PitGeoManager` | Scene-object search (`Update`) and surface-multiplier application (`FixedUpdate`) |
+
+</Accordion>
+
+<Note>
+Both GameObjects are marked `DontDestroyOnLoad`, so they persist across every Gorilla Tag map load and Photon room transition without needing to be re-created.
+</Note>
+
+## Update Loop Breakdown
+
+Each Unity callback has a distinct responsibility:
+
+<Accordion title="OnGUI (Main)">
+
+Runs every GUI render frame.
+
+1. On the **first** call, checks the `SLoaded` flag and calls `GlobalStyles.INIT()` once to initialize all shared `GUIStyle` objects — lazy initialization is used because IMGUI styles cannot be created outside of a GUI event.
+2. Renders the main mod window using `GUI.Window`.
+3. Dispatches `MakeUI()` on every registered sub-mod so each can draw its own controls inside the window.
+
+</Accordion>
+
+<Accordion title="Update (Main)">
+
+Runs every frame (variable rate).
+
+- Polls the **E key** to toggle the main menu window open/closed.
+- Calls `ApredsUI.RunMod()` — the Apreds locomotion mod's per-frame logic.
+
+</Accordion>
+
+<Accordion title="FixedUpdate (Main)">
+
+Runs at a fixed physics timestep (default 50 Hz).
+
+Calls, in order:
+
+| Call | Mod |
+|---|---|
+| `PullModUI.RunMods()` | Pull / attract locomotion |
+| `GorillaTimeUI.RunTMod()` | Gorilla Time slow-motion effect |
+| `PSAModUI.RunPSAMod()` | PSA (position-set assist) mod |
+| `VelMaxUI.RunVMod()` | Velocity cap / max speed |
+| `WallWalkUI.RunWalkerMod()` | Wall-walk surface detection |
+
+</Accordion>
+
+<Accordion title="ATurnModController.FixedUpdate">
+
+Handles smooth-turn (continuous rotation) and snap-turn (discrete angle steps) independently of `Main`. Running in its own component on a separate GameObject means turn logic is isolated from the main mod window and cannot be accidentally disabled by UI state.
+
+</Accordion>
+
+<Accordion title="PitGeoManager.Update + FixedUpdate">
+
+- **`Update`**: searches the scene for target geometry objects by name.
+- **`FixedUpdate`**: applies the configured surface friction / speed multiplier to any geometry found by `Update`.
+
+</Accordion>
+
+## Harmony Patch System
+
+All Harmony patches are applied in a single call during `Plugin.Start()`:
+
+```csharp
+public static void Apply()
+{
+    Harmony harmony = new Harmony("Astras.Mods.Experimental");
+    harmony.PatchAll();
+}
+```
+
+`harmony.PatchAll()` scans all types in the assembly for methods decorated with `[HarmonyPatch]` and applies them automatically.
+
+**Current patch file — `JoinAndLeave.cs`**
+
+Monitors Photon room state transitions (join and leave events) and fires `OnScreenNotify.SendIT(...)` to display the appropriate on-screen message. This is the primary hook into Photon's networking lifecycle.
+
+<Tip>
+To add a new Harmony patch, create a new class with `[HarmonyPatch]` attributes in the assembly. `PatchLoader.Apply()` will pick it up automatically — no registration step required.
+</Tip>
+
+## Shared State — `GlobalVars`
+
+`GlobalVars` acts as the mod's central state store: a static class holding flags, cached references, and configuration values that multiple mods and UI classes need to read or write. Because all mod logic runs on Unity's main thread, no locking is required.
+
+<Warning>
+Avoid caching `GlobalVars` references in local variables across frames. Always read directly from the static fields to ensure you see the most current value, especially for flags that can be toggled by user input each frame.
+</Warning>

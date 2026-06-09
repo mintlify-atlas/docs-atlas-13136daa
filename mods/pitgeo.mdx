@@ -1,0 +1,144 @@
+---
+title: "PitGeo Mod: Pit Geometry Tweaks for Gorilla Tag"
+sidebarTitle: "PitGeo"
+description: "Modify GorillaSurfaceOverride multipliers on pit walls and ground in Gorilla Tag's Forest map. Configure slip and ground velocity boosts per surface zone."
+---
+
+PitGeo modifies the `extraVelMultiplier` and `extraVelMaxMultiplier` values on specific `GorillaSurfaceOverride` components attached to pit geometry in the **Forest map**. By targeting the upper slip wall, lower slip wall, pit ground top, and pit ground bottom independently, you can make individual surfaces far bouncier or faster than their defaults — turning the pit into a high-speed movement zone when your bound input is held.
+
+<Warning>
+  PitGeo only works in the **Forest map**. It searches for pit geometry objects by their full scene path at runtime. In any other map, no objects will be found and the mod will have no effect.
+</Warning>
+
+## Object Search
+
+When PitGeo is enabled it runs a search **every second** until all four target objects are located in the scene hierarchy:
+
+```
+Environment Objects/LocalObjects_Prefab/Forest/Terrain/pitgeo/pit upper slippery wall
+Environment Objects/LocalObjects_Prefab/Forest/Terrain/pitgeo/pit lower slippery wall
+Environment Objects/LocalObjects_Prefab/Forest/Terrain/pitgeo/pit ground top
+Environment Objects/LocalObjects_Prefab/Forest/Terrain/pitgeo/pit ground bottom
+```
+
+Each found object is logged to the console and the `objectsFound` flag is set once all four are located. Surface multipliers are only applied in `FixedUpdate` after this flag is set.
+
+<Note>
+  If you enable PitGeo before the Forest map is fully loaded, the search will keep retrying every second until the objects appear. You do not need to re-enable the mod after a map load.
+</Note>
+
+## Surface Configuration
+
+<Tabs>
+  <Tab title="Slip Walls">
+    ### SlipOptions — Wall Target Selection
+
+    Choose which slip wall surfaces receive the wall multipliers:
+
+    | Option | Surfaces Affected |
+    |---|---|
+    | `None` | No slip walls modified |
+    | `UpperSlipWall` | Upper slippery wall only |
+    | `LowerSlipWall` | Lower slippery wall only |
+    | `BothSlipWalls` | Both upper and lower walls |
+
+    ### Wall Multiplier Parameters
+
+    <Accordion title="WallSlipMult — Wall Velocity Multiplier">
+      **Type:** `float` | **Range:** `1 – 25`
+
+      Applied to `extraVelMultiplier` on the selected slip wall(s) while the input is held. Scales the velocity generated from contact with the wall surface.
+    </Accordion>
+
+    <Accordion title="WallSlipMultOther — Wall Velocity Max Multiplier">
+      **Type:** `float` | **Range:** `1 – 30`
+
+      Applied to `extraVelMaxMultiplier` on the selected slip wall(s). Sets the upper velocity ceiling for wall contacts. Pair with a matching or slightly higher `WallSlipMult` for consistent launches.
+    </Accordion>
+  </Tab>
+
+  <Tab title="Pit Ground">
+    ### GroundOptions — Ground Target Selection
+
+    Choose which pit ground surfaces receive the ground multipliers:
+
+    | Option | Surfaces Affected |
+    |---|---|
+    | `None` | No ground surfaces modified |
+    | `PitGroundTop` | Upper pit ground only |
+    | `PitGroundBottom` | Lower pit ground only |
+
+    ### Ground Multiplier Parameters
+
+    <Accordion title="GroundMult — Ground Velocity Multiplier">
+      **Type:** `float` | **Range:** `1 – 25`
+
+      Applied to `extraVelMultiplier` on the selected pit ground surface while the input is held. Higher values give more explosive pushes off the ground.
+    </Accordion>
+
+    <Accordion title="GroundMultOther — Ground Velocity Max Multiplier">
+      **Type:** `float` | **Range:** `1 – 30`
+
+      Applied to `extraVelMaxMultiplier` on the selected pit ground surface. Controls the top speed achievable from ground contacts. Setting this significantly higher than `GroundMult` gives a broader speed range per touch.
+    </Accordion>
+  </Tab>
+
+  <Tab title="Input Settings">
+    ## Input Binding
+
+    All multipliers are applied **only while the bound input is held** (`InputSelectors.PitPressed`). When released, all modified surfaces revert to `extraVelMaxMultiplier = 1f` and `extraVelMultiplier = 1f`:
+
+    ```csharp
+    if (InputSelectors.PitPressed)
+    {
+        Surface.extraVelMultiplier    = MLT1;
+        Surface.extraVelMaxMultiplier = MLT2;
+    }
+    else
+    {
+        Surface.extraVelMaxMultiplier = 1f;
+        Surface.extraVelMultiplier    = 1f;
+    }
+    ```
+
+    | Option | Description |
+    |---|---|
+    | Right Grab | Hold right grip button |
+    | Left Grab | Hold left grip button |
+    | Right Trigger | Hold right trigger |
+    | Left Trigger | Hold left trigger |
+    | RightJoyStick (Hold) | Hold right thumbstick down |
+    | LeftJoyStick (Hold) | Hold left thumbstick down |
+    | A Button | Hold A |
+    | B Button | Hold B |
+    | X Button | Hold X |
+    | Y Button | Hold Y |
+  </Tab>
+</Tabs>
+
+## Getting Started
+
+<Steps>
+  <Step title="Load the Forest map">
+    Join or create a Gorilla Tag session in the **Forest** map. PitGeo will not find any objects in other maps.
+  </Step>
+  <Step title="Enable PitGeo">
+    Toggle **PitModOnn** on. The mod begins searching for pit geometry every second and logs each found object.
+  </Step>
+  <Step title="Select your surface targets">
+    Choose a **SlipOptions** value (e.g., `BothSlipWalls`) and a **GroundOptions** value (e.g., `PitGroundBottom`) to determine which surfaces are affected.
+  </Step>
+  <Step title="Set your multipliers">
+    Start with `WallSlipMult = 5` / `WallSlipMultOther = 6` and `GroundMult = 5` / `GroundMultOther = 6`. Increase gradually — values above `15` produce very fast launches.
+  </Step>
+  <Step title="Bind your input">
+    Open the **Input Settings** tab and select a button to hold while using the pit. The multipliers only activate while this input is held.
+  </Step>
+  <Step title="Test in the pit">
+    Head to the pit area, hold your input, and touch the selected surfaces. Adjust multipliers until the speed and bounce feel right.
+  </Step>
+</Steps>
+
+<Tip>
+  Use **BothSlipWalls** with moderate multipliers (`8–12`) and **PitGroundBottom** at higher values (`15–20`) to create a funnel effect — the walls guide you down with acceleration while the bottom launches you back up strongly.
+</Tip>

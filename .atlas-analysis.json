@@ -1,0 +1,87 @@
+{
+  "projectType": "general",
+  "projectName": "Experimental",
+  "projectDescription": "A BepInEx mod for Gorilla Tag that bundles multiple movement and utility UIs — pull mod, PSA, predictions, velocity multiplier, wall walk, turn mod, and pit geometry tweaks — into a single in-game menu system.",
+  "theme": "aspen",
+  "primaryColor": "#0099FF",
+  "lightColor": "#33BBFF",
+  "darkColor": "#0066CC",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Mods",
+            "pages": [
+              "mods/pull-mod",
+              "mods/psa-mod",
+              "mods/apreds",
+              "mods/velmax",
+              "mods/wallwalk",
+              "mods/turn-mod",
+              "mods/pitgeo"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "utilities/room-utils",
+              "utilities/on-screen-notify"
+            ]
+          },
+          {
+            "group": "Internals",
+            "pages": [
+              "internals/architecture",
+              "internals/input-system",
+              "internals/gui-helpers"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Single unified in-game menu (open/close with E key)",
+    "Pull Mod — velocity-based pull with configurable hand mode and speed presets",
+    "PSA Mod — joystick-driven player surface acceleration with ground detection",
+    "APreds — hand prediction system with smoothness and arm-length controls",
+    "VelMax Mod — surface velocity multiplier with configurable trigger input",
+    "AWallWalk V2 — forward force on walls via configurable dual-button hold",
+    "Astras TurnMod — smooth and snap turning with per-hand input selection",
+    "PitGeo Mod — slip wall and pit ground surface multiplier tweaks for the Forest pit",
+    "Room Utilities — join by code, join random, and leave via Photon",
+    "On-screen notifications for room join/leave events"
+  ],
+  "publicApiSurface": [
+    "Plugin (BepInEx entry point) — GUID: Astras.Mods.Experimental, Version: 0.0.4",
+    "Main.OnGUI / Update / FixedUpdate — orchestrates all sub-mod render/update loops",
+    "PullModUI.MakeUI() / RunMods()",
+    "PSAModUI.MakePSAModUI() / RunPSAMod() / PSAMod(float speed, float maxGroundDist)",
+    "ApredsUI.MakePredsUI() / RunMod() / EnablePreds() / DisablePreds() / MakePreds()",
+    "VelMaxUI.MakeVelMaxUI() / RunVMod() / VelMaxMod()",
+    "WallWalkUI.MakeWalkerUI() / RunWalkerMod() / Walker()",
+    "ATurnModGUI.MakeATurnModGUI()",
+    "ATurnModController (MonoBehaviour) — SmoothTurn / SnapTurn",
+    "APitGeoModUI.MakePitGeoUI()",
+    "PitGeoManager (MonoBehaviour) — FindObjects / WallSettings / PitGroundSettings / SurfaceMult",
+    "RoomMods.JoinRoom(string) / JoinRandom() / Leave()",
+    "OnScreenNotify.SendIT(string msg, float duration)",
+    "InputSelectors — PPressed, VPressed, UseWalkPressed, ATLPressed, ATRPressed, PitPressed, Axis",
+    "InputLib — RightGrab, LeftGrab, RightTrigger, LeftTrigger, A/B/X/Y buttons, joystick axes",
+    "MenuHelper.Dropdown(string id, string[] options, int selectedIndex, GUILayoutOption[])",
+    "GlobalStyles.INIT() / ApplyBackground(GUIStyle, Texture2D)",
+    "GlobalTex.MakeTex(int w, int h, Color c)",
+    "PatchLoader.Apply()",
+    "GlobalVars — all shared state fields and enums (HandPullMode, TimeSettingss, SlipWallPitOptions, PitGroundOptions)"
+  ]
+}

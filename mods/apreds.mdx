@@ -1,0 +1,94 @@
+---
+title: "APreds: Hand Prediction Mod for Gorilla Tag"
+sidebarTitle: "APreds"
+description: "Predict and extend hand positions ahead of movement velocity in Gorilla Tag. Configure prediction strength, smoothness, threshold, and max arm length."
+---
+
+APreds (Astra Predictions) reads the instantaneous velocity of each hand via a `GorillaVelocityTracker` and nudges the hand's position forward along its movement direction before the frame renders. The result is a subtle extension of each reach that can help you tag surfaces or players that are just outside your normal arm range — especially during fast swings or launches.
+
+## How the Tracker Works
+
+When APreds is enabled, the mod creates two invisible `GameObject` cubes (one per hand) and attaches a `GorillaVelocityTracker` component to each. These objects are parented to the left and right hand transforms so they track hand motion every frame. When APreds is disabled the objects are destroyed, leaving no persistent scene changes.
+
+```
+EnablePreds  → Instantiate cube → attach GorillaVelocityTracker → parent to hand
+DisablePreds → Destroy tracker GameObjects
+```
+
+<Note>
+  Because the tracker objects are created at runtime and destroyed on disable, toggling APreds mid-session is safe and does not accumulate stale objects in the scene hierarchy.
+</Note>
+
+## Parameters
+
+<Accordion title="PredSrength — Prediction Strength">
+  **Type:** `float` | **Range:** `0.001 – 0.200`
+
+  The scalar applied to the hand's velocity when computing the predicted target position:
+
+  ```csharp
+  target = hand.position + velocity * PredSrength;
+  ```
+
+  Low values (`0.01–0.05`) produce a barely noticeable extension, while the maximum (`0.20`) pushes hands significantly ahead of their physical position. Start low and increase gradually — very high values can make hands feel detached.
+</Accordion>
+
+<Accordion title="movementThreshold — Activation Threshold">
+  **Type:** `float` | **Range:** `0.01 – 0.300`
+
+  The minimum velocity magnitude (in units/frame) required before prediction is applied to a hand. If the hand velocity's magnitude is below this value, the hand position is left untouched. Raise this to prevent micro-jitter prediction when your hands are nearly still; lower it for prediction that activates even during slow reaches.
+</Accordion>
+
+<Accordion title="smoothness — Lerp Smoothness">
+  **Type:** `float` | **Range:** `0.01 – 0.500`
+
+  The `t` value passed to `Lerp` when blending from the current hand position toward the predicted target:
+
+  ```csharp
+  hand.position = Vector3.Lerp(hand.position, target, smoothness);
+  ```
+
+  Lower values (`0.01–0.1`) produce gradual, floaty prediction. Higher values (`0.4–0.5`) snap hands quickly to the predicted position. Match this to your movement speed — faster movement generally benefits from higher smoothness.
+</Accordion>
+
+<Accordion title="maxArmLength — Arm Length Clamp">
+  **Type:** `float` | **Range:** `1.0 – 2.5`
+
+  After the prediction lerp is applied, each hand is clamped to at most `maxArmLength` units from the player's head position. This prevents extreme prediction values from stretching your arms to physically impossible lengths or clipping through distant geometry.
+</Accordion>
+
+## Presets
+
+| Preset | PredSrength | Notes |
+|---|---|---|
+| **Max** | `0.200` | Full prediction — hands lead movement significantly |
+| **Random** | `0.001 – 0.200` | Randomises prediction strength within range |
+| **Reset** | `0.001` | Near-zero prediction, essentially off |
+
+<Tip>
+  There is no dedicated "Legit" preset for APreds. Build your own by starting at `PredSrength = 0.030`, `smoothness = 0.15`, and `movementThreshold = 0.05`, then adjust from there.
+</Tip>
+
+## Getting Started
+
+<Steps>
+  <Step title="Open the APreds window">
+    Launch Experimental and open the **E - APreds UI** window from the mod menu.
+  </Step>
+  <Step title="Enable the mod">
+    Toggle **IsPredOn** on. The two tracker `GameObject` cubes are created automatically.
+  </Step>
+  <Step title="Set prediction strength">
+    Begin with a low `PredSrength` value (`0.02–0.05`) and swing your arms to feel the extension. Increase incrementally until reaches feel satisfying.
+  </Step>
+  <Step title="Tune the threshold">
+    If you notice prediction firing when your hands are resting, raise `movementThreshold` until jitter-prediction stops.
+  </Step>
+  <Step title="Adjust smoothness and arm length">
+    Lower `smoothness` for a fluid feel or raise it for snappier response. Reduce `maxArmLength` if your hands appear to reach through walls.
+  </Step>
+</Steps>
+
+<Warning>
+  Setting `maxArmLength` above `2.0` may allow hands to intersect distant surfaces or players unintentionally. Keep it at or below `1.8` unless you specifically need extended reach.
+</Warning>
