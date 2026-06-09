@@ -4,7 +4,7 @@ sidebarTitle: "Architecture"
 description: "How Experimental's BepInEx plugin bootstraps two persistent GameObjects, applies Harmony patches, and drives its per-frame update loops."
 ---
 
-Experimental is a BepInEx 6 plugin that bootstraps itself into Gorilla Tag by creating two persistent `GameObject` hierarchies at startup, then drives all mod logic through Unity's standard `Update`, `FixedUpdate`, and `OnGUI` MonoBehaviour callbacks. Understanding this structure is essential for adding new mods or debugging existing ones.
+Experimental is a BepInEx plugin that bootstraps itself into Gorilla Tag by creating two persistent `GameObject` hierarchies at startup, then drives all mod logic through Unity's standard `Update`, `FixedUpdate`, and `OnGUI` MonoBehaviour callbacks. Understanding this structure is essential for adding new mods or debugging existing ones.
 
 ## BepInEx Entry Point — `Plugin`
 
@@ -71,8 +71,8 @@ Each Unity callback has a distinct responsibility:
 Runs every GUI render frame.
 
 1. On the **first** call, checks the `SLoaded` flag and calls `GlobalStyles.INIT()` once to initialize all shared `GUIStyle` objects — lazy initialization is used because IMGUI styles cannot be created outside of a GUI event.
-2. Renders the main mod window using `GUI.Window`.
-3. Dispatches `MakeUI()` on every registered sub-mod so each can draw its own controls inside the window.
+2. Renders the main mod window using `GUILayout.Window`.
+3. Calls each sub-mod's UI method directly (`PullModUI.MakeUI()`, `ApredsUI.MakePredsUI()`, `PSAModUI.MakePSAModUI()`, etc.) so each can draw its own controls.
 
 </Accordion>
 
@@ -121,16 +121,16 @@ All Harmony patches are applied in a single call during `Plugin.Start()`:
 ```csharp
 public static void Apply()
 {
-    Harmony harmony = new Harmony("Astras.Mods.Experimental");
-    harmony.PatchAll();
+    Harmony VALLL = new Harmony(Constantss.GUID);
+    VALLL.PatchAll();
 }
 ```
 
-`harmony.PatchAll()` scans all types in the assembly for methods decorated with `[HarmonyPatch]` and applies them automatically.
+`PatchAll()` scans all types in the assembly for methods decorated with `[HarmonyPatch]` and applies them automatically.
 
 **Current patch file — `JoinAndLeave.cs`**
 
-Monitors Photon room state transitions (join and leave events) and fires `OnScreenNotify.SendIT(...)` to display the appropriate on-screen message. This is the primary hook into Photon's networking lifecycle.
+Contains `JoinManager`, a `MonoBehaviour` whose `Update` method polls `PhotonNetwork.InRoom` each frame to detect room state transitions (join and leave events), then fires `OnScreenNotify.SendIT(...)` to display the appropriate on-screen message.
 
 <Tip>
 To add a new Harmony patch, create a new class with `[HarmonyPatch]` attributes in the assembly. `PatchLoader.Apply()` will pick it up automatically — no registration step required.

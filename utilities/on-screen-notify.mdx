@@ -27,7 +27,7 @@ Because `OnScreenNotify` uses IMGUI, notifications render in screen space and ar
 public static void SendIT(string msg, float det = 2f)
 ```
 
-The only public entry point. Call this static method from anywhere in the mod; it routes the message to the singleton instance internally.
+The only public entry point. Call this static method from anywhere in the mod; it routes the message to the singleton instance internally via `SendNotifyScreen`.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -35,12 +35,12 @@ The only public entry point. Call this static method from anywhere in the mod; i
 | `det` | `float` | `2f` | How long the notification stays visible, in seconds. |
 
 <Warning>
-`SendIT` silently does nothing if the singleton `Instance` is `null`. The instance is created when the `OnScreenNotify` component is added to the persistent `Experimental.UIS` GameObject during plugin startup. Do not call `SendIT` before `Awake` has run.
+`SendIT` silently does nothing if the singleton `Instance` is `null`. The instance is set in `Awake` when the `OnScreenNotify` component is initialized. Do not call `SendIT` before `Awake` has run.
 </Warning>
 
 ## Built-In Usage
 
-Experimental automatically sends notifications for Photon room events via `JoinAndLeave.cs`:
+Experimental automatically sends notifications for Photon room events via `JoinManager` in `JoinAndLeave.cs`. `JoinManager` is a `MonoBehaviour` whose `Update` method polls `PhotonNetwork.InRoom` each frame and fires `OnScreenNotify.SendIT` whenever the room state changes:
 
 <CodeGroup>
 

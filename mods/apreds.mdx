@@ -8,10 +8,11 @@ APreds (Astra Predictions) reads the instantaneous velocity of each hand via a `
 
 ## How the Tracker Works
 
-When APreds is enabled, the mod creates two invisible `GameObject` cubes (one per hand) and attaches a `GorillaVelocityTracker` component to each. These objects are parented to the left and right hand transforms so they track hand motion every frame. When APreds is disabled the objects are destroyed, leaving no persistent scene changes.
+When APreds is enabled, the mod creates two invisible `GameObject` cubes (one per hand) and attaches a `GorillaVelocityTracker` component to each. Every frame these objects are repositioned to match the current left and right hand positions so the tracker can sample hand velocity. When APreds is disabled the objects are destroyed, leaving no persistent scene changes.
 
 ```
-EnablePreds  → Instantiate cube → attach GorillaVelocityTracker → parent to hand
+EnablePreds  → Instantiate cube → attach GorillaVelocityTracker
+MakePreds    → reposition cube to hand position each frame → sample velocity
 DisablePreds → Destroy tracker GameObjects
 ```
 

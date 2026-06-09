@@ -1,7 +1,7 @@
 ---
-title: "Install Experimental on Gorilla Tag"
+title: "How to Install the Experimental Gorilla Tag Plugin"
 sidebarTitle: "Installation"
-description: "Step-by-step guide to installing the Experimental BepInEx plugin on Gorilla Tag — from downloading BepInEx to placing the DLL."
+description: "Step-by-step guide to installing the Experimental BepInEx plugin on Gorilla Tag — from downloading BepInEx to placing the DLL in your plugins folder."
 ---
 
 Installing Experimental takes only a few minutes. You will download BepInEx, extract it into your Gorilla Tag directory, and then drop a single DLL file into the plugins folder. Everything below assumes you already own Gorilla Tag on PC (Steam or standalone).
@@ -26,7 +26,7 @@ Installing Experimental takes only a few minutes. You will download BepInEx, ext
   <Step title="Extract BepInEx into your Gorilla Tag directory">
     Locate your Gorilla Tag installation folder (right-click the game in Steam → **Manage → Browse local files**). Extract the contents of the BepInEx zip directly into that folder so the `BepInEx/` directory sits alongside `Gorilla Tag.exe`:
 
-    ```
+    ```text
     Gorilla Tag/
     ├── Gorilla Tag.exe
     ├── BepInEx/
@@ -47,7 +47,7 @@ Installing Experimental takes only a few minutes. You will download BepInEx, ext
   <Step title="Copy Experimental.dll into BepInEx/plugins/">
     Place the downloaded DLL inside the `BepInEx/plugins/` folder you just saw created. Your directory should now look like this:
 
-    ```
+    ```text
     Gorilla Tag/
     ├── Gorilla Tag.exe
     ├── BepInEx/
@@ -68,7 +68,7 @@ Installing Experimental takes only a few minutes. You will download BepInEx, ext
 
 BepInEx writes a log to `BepInEx/LogOutput.log` in your game directory. Open that file after launching and search for `Experimental`. A successful load looks like this:
 
-```
+```text
 [Info   :   BepInEx] Loading [Experimental 0.0.4]
 [Info   :Experimental] ...
 ```
@@ -81,4 +81,4 @@ If you see an error instead, double-check that you downloaded the **Unity Mono**
 
 ## Next Steps
 
-Head to the [Quickstart guide](/quickstart) to open your first mod window and configure it for the first time.
+Head to the [Quickstart guide](quickstart) to open your first mod window and configure it for the first time.

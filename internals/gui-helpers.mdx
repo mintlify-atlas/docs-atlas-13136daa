@@ -12,7 +12,7 @@ Experimental's IMGUI menu is built on three helper classes that handle texture c
 public static Texture2D MakeTex(int WW, int HH, Color H)
 ```
 
-Creates a new `Texture2D` of the given dimensions filled with a single solid color. Used internally by `GlobalStyles` to generate the background textures for every UI element.
+Creates a new `Texture2D` of the given dimensions, sets the pixel at (0, 0) to the specified color via `SetPixel`, then calls `Apply()` to upload it to the GPU. Used internally by `GlobalStyles` to generate the background textures for every UI element.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -64,11 +64,11 @@ All colors are defined as RGBA floats and passed through `GlobalTex.MakeTex`:
 
 ### `ApplyBackground`
 
-A helper method on `GlobalStyles` that stamps a `Texture2D` onto all interactive states (`normal`, `hover`, `active`, `onNormal`, `onHover`, `onActive`) of a given `GUIStyle` at once — saving repetitive property assignment when defining a new style.
+A helper method on `GlobalStyles` that stamps a `Texture2D` onto all eight interactive states (`normal`, `hover`, `active`, `focused`, `onNormal`, `onHover`, `onActive`, `onFocused`) of a given `GUIStyle` at once — saving repetitive property assignment when defining a new style.
 
 ```csharp
 // Apply the same texture to every state of a custom style
-GlobalStyles.ApplyBackground(ref myStyle, GlobalTex.MakeTex(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f)));
+GlobalStyles.ApplyBackground(myStyle, GlobalTex.MakeTex(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f)));
 ```
 
 <Warning>
@@ -104,7 +104,7 @@ public static int Dropdown(
 Internally, `Dropdown` maintains a `static Dictionary<string, bool>` that maps each `id` to whether that dropdown is currently expanded. On each `OnGUI` call:
 
 1. Renders a main button labeled with `options[selectedIndex]`.
-2. If the dictionary marks this `id` as open, renders a button for every entry in `options` below the main button.
+2. If the dictionary marks this `id` as open, renders a button for every entry in `options` below the main button inside a `GUILayout.BeginVertical` block.
 3. Clicking an option button closes the dropdown and returns that option's index.
 4. Clicking the main button again toggles it closed without changing the selection.
 
@@ -135,9 +135,9 @@ InputSelectors.PSelectedIndex = MenuHelper.Dropdown(
     {
         "Right Grab", "Left Grab",
         "Right Trigger", "Left Trigger",
+        "RightJoyStick (Hold)", "LeftJoyStick (Hold)",
         "A Button", "B Button",
-        "X Button", "Y Button",
-        "Right Joystick Click", "Left Joystick Click"
+        "X Button", "Y Button"
     },
     InputSelectors.PSelectedIndex,
     GUILayout.Width(200)

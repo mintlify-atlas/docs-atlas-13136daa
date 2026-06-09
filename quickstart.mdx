@@ -1,10 +1,10 @@
 ---
-title: "Get Started with Experimental Mods"
+title: "Quickstart: Using the Experimental Mod Menu in Gorilla Tag"
 sidebarTitle: "Quickstart"
 description: "Open the Experimental menu, enable your first mod, configure Pull Mod and VelMax, and learn how every bundled tool fits together in minutes."
 ---
 
-This guide picks up right where [Installation](/installation) left off. With BepInEx installed and `Experimental.dll` sitting in your `plugins/` folder, you are ready to open the menu and start experimenting. The whole flow from launch to an active mod takes under two minutes.
+This guide picks up right where [Installation](installation) left off. With BepInEx installed and `Experimental.dll` sitting in your `plugins/` folder, you are ready to open the menu and start experimenting. The whole flow from launch to an active mod takes under two minutes.
 
 ## Steps
 
@@ -24,7 +24,7 @@ This guide picks up right where [Installation](/installation) left off. With Bep
     |---|---|
     | Astras PM V1 | Pull Mod |
     | Apreds UI | Hand Prediction |
-    | Gorilla TimeV2 | Time & Weather Control |
+    | Gorilla TimeV2 | Time Control |
     | Astras PSA Mod | Joystick Surface Acceleration |
     | Astras VelMax Mod | Surface Velocity Multiplier |
     | AWallWalk V2 | Wall Walking |
@@ -38,12 +38,13 @@ This guide picks up right where [Installation](/installation) left off. With Bep
     Click the **Astras PM V1** toggle. A new draggable window — the Pull Mod panel — appears on screen. This is where you configure the velocity pull that fires when you release a grabbed surface.
   </Step>
 
-  <Step title="Configure Pull Mod: slider, preset, and input">
+  <Step title="Configure Pull Mod: sliders, preset, and input">
     Inside the Pull Mod window:
 
-    1. **Drag the Pull Speed slider** to set how hard the pull launches you on release. Higher values mean a larger velocity boost.
-    2. **Choose a preset** for a quick starting point — for example, select **"Legit Setting: (70)"** to use a community-balanced value that keeps movement feeling natural.
-    3. **Pick an input binding** — for example, choose **Right Grab** so the pull triggers when you release the right controller's grab button.
+    1. **Drag the PullSpeed slider** to set how hard the pull launches you on release. Higher values mean a larger velocity boost.
+    2. **Drag the UphillPower slider** to control the upward component of the pull separately.
+    3. **Choose a preset** for a quick starting point — for example, click **Legit Setting: (70)** to use a community-balanced value that keeps movement feeling natural.
+    4. **Pick an input binding** using the dropdown under **Change Input:**. The available options include Right Grab, Left Grab, Right Trigger, Left Trigger, and joystick or face-button combinations. The selected input must be held for the pull to trigger on hand release.
 
     <Tip>
       The **Reset** button inside any mod window always returns that mod's settings to their safe defaults. If something feels off, hit Reset before adjusting further.
@@ -79,13 +80,13 @@ Now that you have the basics down, try out the rest of the bundled mods:
 
 <CardGroup cols={2}>
   <Card title="Gorilla TimeV2" icon="sun">
-    Open the time and weather window to change the sky to dusk, night, or a stormy overcast while you play.
+    Open the time window to change the sky to morning, day, evening, or night while you play.
   </Card>
   <Card title="AWallWalk V2" icon="grid-2">
     Enable wall walking and practice traversing the vertical surfaces around the map without losing grip.
   </Card>
   <Card title="Astras TurnMod" icon="rotate-right">
-    Switch between smooth and snap turning presets to find the rotation style that feels most comfortable.
+    Switch between smooth and snap turning to find the rotation style that feels most comfortable.
   </Card>
   <Card title="Astras PitGeo GUI" icon="mountain">
     Adjust pit geometry surface values to change how the pit terrain responds to contact and velocity.

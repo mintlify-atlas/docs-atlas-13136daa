@@ -26,7 +26,7 @@ Grip is analog at the hardware level; the 0.5 threshold converts it to a digital
 | `RightTrigger` | `bool` | `rightControllerTriggerButton` |
 | `LeftTrigger` | `bool` | `leftControllerTriggerButton` |
 
-These use the game's built-in digital trigger buttons rather than the analog float.
+These use the game's built-in digital trigger button rather than an analog float.
 
 ### Face Buttons
 
@@ -67,7 +67,7 @@ Each mod maintains its own isolated binding so two mods can safely use different
 
 The following mods use a `bool` pressed signal. Unless noted otherwise, they share the same 10-option list:
 
-> **10-option list (index 0–9):** Right Grab, Left Grab, Right Trigger, Left Trigger, A Button, B Button, X Button, Y Button, Right Joystick Click, Left Joystick Click
+> **10-option list (index 0–9):** Right Grab, Left Grab, Right Trigger, Left Trigger, RightJoyStick (Hold), LeftJoyStick (Hold), A Button, B Button, X Button, Y Button
 
 <Accordion title="PullMod">
 
@@ -100,7 +100,7 @@ Uses a 4-option combo list — two buttons must be held simultaneously:
 | 0 | Left Trigger **&** Right Trigger |
 | 1 | Left Grab **&** Right Grab |
 | 2 | Left Joystick Click **&** Right Joystick Click |
-| 3 | Left B Button **&** Right B Button |
+| 3 | Left Buttons (X or Y) **&** Right Buttons (A or B) |
 
 | Property | Type | Purpose |
 |---|---|---|
